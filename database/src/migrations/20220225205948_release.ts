@@ -18,7 +18,7 @@ const DB_RELEASE = 'release.0.1.0';
 export async function up(knex: Knex): Promise<void> {
   const create_spatial_extensions = fs.readFileSync(path.join(__dirname, DB_RELEASE, 'create_spatial_extensions.psql'));
 
-  const biohub_ods_spi_ddl = fs.readFileSync(path.join(__dirname, DB_RELEASE, 'biohub_ods_spi.sql'));
+  const cwi_spi_opd_ddl = fs.readFileSync(path.join(__dirname, DB_RELEASE, 'cwi_spi_opd_ddl.sql'));
   await knex.raw(`
     -- set up spatial extensions
     ${create_spatial_extensions}
@@ -41,7 +41,7 @@ export async function up(knex: Knex): Promise<void> {
     alter DEFAULT PRIVILEGES in SCHEMA ${SPI_DATA_SCHEMA} grant ALL on tables to ${DB_USER_API};
     alter role ${DB_USER_API} set search_path to ${SPI_DATA_SCHEMA}, public, topology;
 
-    ${biohub_ods_spi_ddl}
+    ${cwi_spi_opd_ddl}
   `);
 }
 
