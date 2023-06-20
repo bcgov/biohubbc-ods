@@ -1,0 +1,167 @@
+# Some extra/old git action jobs, stored here as a backup, should they need to be re-instantiated.
+
+name: PR-Based Deploy on OpenShift
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.merged == false && github.event.pull_request.draft == false && github.base_ref != 'prod' }}
+    env:
+      CYPRESS_RECORD_KEY: ${{ secrets.RECORDING_KEY }}
+      CYPRESS_username: ${{ secrets.CYPRESS_USER_NAME }}
+      CYPRESS_password: ${{ secrets.CYPRESS_PASSWORD }}
+      CYPRESS_BASE_URL: "https://biohub-platform-app-${{ github.event.number }}-a0ec71-dev.apps.silver.devops.gov.bc.ca"
+      CYPRESS_host: "https://biohub-platform-app-${{ github.event.number }}-a0ec71-dev.apps.silver.devops.gov.bc.ca"
+      CYPRESS_ENVIRONMENT: ${{ github.base_ref }}
+      CYPRESS_authRealm: "35r1iman"
+      CYPRESS_authClientId: "biohubbc"
+      CYPRESS_authUrl: "https://${{ github.base_ref }}.oidc.gov.bc.ca"
+    needs:
+      - deployDatabase
+      - deployDatabaseSetup
+      - deployAPI
+      - deployAPP
+    steps:
+      # Checkout the PR branch
+      - name: Checkout Target Branch
+        uses: actions/checkout@v2
+
+      - name: Wait for API response
+        uses: nev7n/wait_for_response@v1.0.1
+        with:
+          url: "https://biohub-platform-api-${{ github.event.number }}-a0ec71-dev.apps.silver.devops.gov.bc.ca/version"
+          responseCode: 200
+          timeout: 240000
+          interval: 500
+
+      - name: Wait for APP response
+        uses: nev7n/wait_for_response@v1.0.1
+        with:
+          url: "https://biohub-platform-app-${{ github.event.number }}-a0ec71-dev.apps.silver.devops.gov.bc.ca"
+          responseCode: 200
+          timeout: 120000
+          interval: 500
+
+      - name: E2E Smoke tests
+        uses: cypress-io/github-action@v2
+        # let's give this action an ID so we can refer
+        # to its output values later
+        id: smoke
+        continue-on-error: false
+        with:
+          wait-on: "https://biohub-platform-app-${{ github.event.number }}-a0ec71-dev.apps.silver.devops.gov.bc.ca"
+          wait-on-timeout: 120
+          record: true
+          working-directory: testing/e2e
+          spec: cypress/integration/smoke*.spec.ts
+          browser: chrome
+          ci-build-id: ${{ github.event.number }}
+
+      - name: Print Env Vars
+        run: |
+          echo Git Base Ref: ${{ github.base_ref }}
+          echo Git Change ID: ${{ github.event.number }}
+          echo Cypress BaseUrl: $CYPRESS_BASE_URL
+          echo Cypress Host: $CYPRESS_ENVIRONMENT
+          echo $CYPRESS_authRealm
+          echo $CYPRESS_authClientId
+          echo $CYPRESS_authUrl
+
+  # Build the GeoServer image
+  buildGeoserver:
+    name: Build GeoServer Image
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.merged == false && github.event.pull_request.draft == false }}
+    env:
+      PR_NUMBER: ${{ github.event.number }}
+    needs:
+      - checkoutRepo
+    steps:
+      # Install Node - for `node` and `npm` commands
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      # Load repo from cache
+      - name: Cache repo
+        uses: actions/cache@v2
+        id: cache-repo
+        env:
+          cache-name: cache-repo
+        with:
+          path: ${{ github.workspace }}/*
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.sha }}
+
+      # Checkout the branch if not restored via cache
+      - name: Checkout Target Branch
+        if: steps.cache-repo.outputs.cache-hit != 'true'
+        uses: actions/checkout@v2
+
+      # Log in to OpenShift.
+      # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
+      # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
+      - name: Log in to OpenShift
+        run: oc login --token=${{ secrets.TOOLS_SA_TOKEN }} --server=https://api.silver.devops.gov.bc.ca:6443
+
+      # Build the GeoServer image
+      - name: Build GeoServer Image
+        working-directory: "./geoserver/.pipeline/"
+        run: |
+          npm ci
+          DEBUG=* npm run build -- --pr=$PR_NUMBER
+
+  # Deploy GeoServer image
+  deployGeoserver:
+    name: Deploy Geoserver Image
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.merged == false && github.event.pull_request.draft == false }}
+    env:
+      PR_NUMBER: ${{ github.event.number }}
+    needs:
+      - scaleDownPods
+      - buildGeoserver
+      # - deployDatabase
+      # - deployDatabaseSetup
+    steps:
+      # Install Node - for `node` and `npm` commands
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      # Load repo from cache
+      - name: Cache repo
+        uses: actions/cache@v2
+        id: cache-repo
+        env:
+          cache-name: cache-repo
+        with:
+          path: ${{ github.workspace }}/*
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ github.sha }}
+
+      # Checkout the branch if not restored via cache
+      - name: Checkout Target Branch
+        if: steps.cache-repo.outputs.cache-hit != 'true'
+        uses: actions/checkout@v2
+
+      # Log in to OpenShift.
+      # Note: The secrets needed to log in are NOT available if the PR comes from a FORK.
+      # PR's must originate from a branch off the original repo or else all openshift `oc` commands will fail.
+      - name: Log in to OpenShift
+        run: oc login --token=${{ secrets.TOOLS_SA_TOKEN }} --server=https://api.silver.devops.gov.bc.ca:6443
+
+      # Deploy the GeoServer image
+      - name: Deploy GeoServer Image
+        working-directory: "./geoserver/.pipeline/"
+        run: |
+          npm ci
+          DEBUG=* npm run deploy -- --pr=$PR_NUMBER --env=dev

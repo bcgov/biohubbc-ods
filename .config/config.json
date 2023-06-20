@@ -1,0 +1,64 @@
+{
+  "name": "biohub-ods",
+  "namespaceSuffix": "a0ec71",
+  "namespace": {
+    "tools": "tools",
+    "dev": "dev",
+    "test": "test",
+    "prod": "prod"
+  },
+  "version": "1.0.0",
+  "timezone": {
+    "db": "America/Vancouver",
+    "api": "America/Vancouver"
+  },
+  "module": {
+    "db": "biohub-ods-db",
+    "api": "biohub-ods-api"
+  },
+  "staticUrlsAPI": {
+    "dev": "api-dev-biohub-ods.apps.silver.devops.gov.bc.ca",
+    "test": "api-test-biohub-ods.apps.silver.devops.gov.bc.ca",
+    "prod": "api-biohub-ods.apps.silver.devops.gov.bc.ca"
+  },
+  "siteminderLogoutURL": {
+    "dev": "https://logontest7.gov.bc.ca/clp-cgi/logoff.cgi",
+    "test": "https://logontest7.gov.bc.ca/clp-cgi/logoff.cgi",
+    "prod": "https://logon7.gov.bc.ca/clp-cgi/logoff.cgi"
+  },
+  "sso": {
+    "dev": {
+      "url": "https://dev.loginproxy.gov.bc.ca/auth",
+      "clientId": "bio-hub-browser-4230",
+      "realm": "standard",
+      "integrationId": "4230",
+      "adminHost": "https://loginproxy.gov.bc.ca/auth",
+      "adminUserName": "biohub-svc-4466",
+      "apiHost": "https://api.loginproxy.gov.bc.ca/api/v1",
+      "keycloakSecret": "keycloak-admin-password",
+      "keycloakSecretAdminPassword": "keycloak_admin_password"
+    },
+    "test": {
+      "url": "https://test.loginproxy.gov.bc.ca/auth",
+      "clientId": "bio-hub-browser-4230",
+      "realm": "standard",
+      "integrationId": "4230",
+      "adminHost": "https://loginproxy.gov.bc.ca/auth",
+      "adminUserName": "biohub-svc-4466",
+      "apiHost": "https://api.loginproxy.gov.bc.ca/api/v1",
+      "keycloakSecret": "keycloak-admin-password",
+      "keycloakSecretAdminPassword": "keycloak_admin_password"
+    },
+    "prod": {
+      "url": "https://loginproxy.gov.bc.ca/auth",
+      "clientId": "bio-hub-browser-4230",
+      "realm": "standard",
+      "integrationId": "4230",
+      "adminHost": "https://loginproxy.gov.bc.ca/auth",
+      "adminUserName": "biohub-svc-4466",
+      "apiHost": "https://api.loginproxy.gov.bc.ca/api/v1",
+      "keycloakSecret": "keycloak-admin-password",
+      "keycloakSecretAdminPassword": "keycloak_admin_password"
+    }
+  }
+}
