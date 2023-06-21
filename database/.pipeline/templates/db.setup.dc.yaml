@@ -22,7 +22,11 @@ parameters:
     description: 'Database service name associated  with deployment'
     required: true
   - name: DB_SPI_SCHEMA
-    description: 'Database schema'
+    description: 'SPI database schema'
+    required: true
+    required: true
+  - name: DB_TXN_SCHEMA
+    description: 'TXN database schema'
     required: true
     required: true
   - name: NODE_ENV
@@ -94,6 +98,8 @@ objects:
               value: ${VERSION}
             - name: DB_SPI_SCHEMA
               value: ${DB_SPI_SCHEMA}
+            - name: DB_TXN_SCHEMA
+              value: ${DB_TXN_SCHEMA}
           imagePullPolicy: Always
       restartPolicy: Never
       activeDeadlineSeconds: 900

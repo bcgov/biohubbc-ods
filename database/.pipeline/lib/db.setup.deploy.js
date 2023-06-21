@@ -69,6 +69,7 @@ const dbSetupDeploy = async (settings) => {
         NODE_ENV: phases[phase].env || 'dev',
         DB_SERVICE_NAME: dbName,
         DB_SPI_SCHEMA: process.env.DB_SPI_SCHEMA,
+        DB_TXN_SCHEMA: process.env.DB_TXN_SCHEMA,
         IMAGE: dbSetupImageStream.image.dockerImageReference
       }
     })

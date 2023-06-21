@@ -54,6 +54,7 @@ services:
       - DB_PORT=5432
       - DB_DATABASE=${DB_DATABASE}
       - DB_SPI_SCHEMA=${DB_SPI_SCHEMA}
+      - DB_TXN_SCHEMA=${DB_TXN_SCHEMA}
       - KEYCLOAK_HOST=${KEYCLOAK_HOST}
       - KEYCLOAK_REALM=${KEYCLOAK_REALM}
       - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
@@ -113,6 +114,7 @@ services:
       - DB_PORT=5432
       - DB_DATABASE=${DB_DATABASE}
       - DB_SPI_SCHEMA=${DB_SPI_SCHEMA}
+      - DB_TXN_SCHEMA=${DB_TXN_SCHEMA}
       - DB_USER_API=${DB_USER_API}
       - DB_USER_API_PASS=${DB_USER_API_PASS}
     volumes:
@@ -139,6 +141,7 @@ services:
       - DB_PORT=5432
       - DB_DATABASE=${DB_DATABASE}
       - DB_SPI_SCHEMA=${DB_SPI_SCHEMA}
+      - DB_TXN_SCHEMA=${DB_TXN_SCHEMA}
       - DB_USER_API=${DB_USER_API}
       - DB_USER_API_PASS=${DB_USER_API_PASS}
     volumes:
@@ -165,6 +168,7 @@ services:
       - DB_PORT=5432
       - DB_DATABASE=${DB_DATABASE}
       - DB_SPI_SCHEMA=${DB_SPI_SCHEMA}
+      - DB_TXN_SCHEMA=${DB_TXN_SCHEMA}
       - DB_USER_API=${DB_USER_API}
       - DB_USER_API_PASS=${DB_USER_API_PASS}
     volumes:
