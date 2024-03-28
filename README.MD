@@ -9,7 +9,7 @@ There are three main components:
 A Java application that is designed to work on a prepared PostgreSQL database (see documentation on preparation steps in
 Confluence).
 
-To execute, ensure you have a modern Java runtime and execute:
+To execute, ensure you have a modern Java runtime, adjust `./src/main/resources/application.properties` with correct database coordinates and run:
 
 ```
 ./gradlew bootRun
